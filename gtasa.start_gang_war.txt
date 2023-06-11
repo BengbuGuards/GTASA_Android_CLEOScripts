@@ -1,0 +1,23 @@
+// Script by BengbuGuards
+{$CLEO .csi}
+0000: NOP 
+ 
+0879: enable_gang_wars 1 
+090D: highlight_all_inactive_gang_zones_as_available_for_gangwars 
+0DD0: 0@ = get_label_addr @CGangWars_StartOffensiveGangWar
+0DD1: 0@ = get_func_addr_by_cstr_name 0@
+0DD2: context_call_func 0@
+0DD0: 0@ = get_label_addr @CGangWars_Update
+0DD1: 0@ = get_func_addr_by_cstr_name 0@
+0DD2: context_call_func 0@  
+terminate_this_custom_script 
+
+:CGangWars_StartOffensiveGangWar
+hex
+    "_ZN9CGangWars21StartOffensiveGangWarEv" 00
+end
+
+:CGangWars_Update
+hex
+    "_ZN9CGangWars6UpdateEv" 00
+end

@@ -1,0 +1,109 @@
+// Script by BengbuGuards
+{$CLEO .csa}
+
+script_name 'WNDCTRL' 
+0000: nop
+0DD0: 10@ = get_label_addr @CPools_GetVehicle
+0DD1: 10@ = get_func_addr_by_cstr_name 10@
+0DD0: 11@ = get_label_addr @CVehicle_SetWindowOpenFlag
+0DD1: 11@ = get_func_addr_by_cstr_name 11@
+0DD0: 12@ = get_label_addr @CVehicle_ClearWindowOpenFlag
+0DD1: 12@ = get_func_addr_by_cstr_name 12@
+
+:WNDCTRL_1
+wait 0 
+if and
+0256: player $PLAYER_CHAR defined 
+00DF: actor $PLAYER_ACTOR driving
+jf @WNDCTRL_1 
+
+:WNDCTRL_2
+0DE1: 2@ = get_touch_slide_state from 1 to 2 mintime 0 maxtime 500
+0DE1: 3@ = get_touch_slide_state from 2 to 3 mintime 0 maxtime 500
+0DE1: 4@ = get_touch_slide_state from 7 to 8 mintime 0 maxtime 500
+0DE1: 5@ = get_touch_slide_state from 8 to 9 mintime 0 maxtime 500
+
+if
+    2@ == 1
+then
+    WNDCTRL_GETCAR()
+    0DD3: context_set_reg 1 value 10
+    0DD2: context_call_func 11@
+end
+if
+    3@ == 1
+then
+    WNDCTRL_GETCAR()
+    0DD3: context_set_reg 1 value 11
+    0DD2: context_call_func 11@
+end
+if
+    4@ == 1
+then
+    WNDCTRL_GETCAR()
+    0DD3: context_set_reg 1 value 8
+    0DD2: context_call_func 11@
+end
+if
+    5@ == 1
+then
+    WNDCTRL_GETCAR()
+    0DD3: context_set_reg 1 value 9 
+    0DD2: context_call_func 11@
+end
+
+:WNDCTRL_3
+0DE1: 6@ = get_touch_slide_state from 2 to 1 mintime 0 maxtime 500
+0DE1: 7@ = get_touch_slide_state from 3 to 2 mintime 0 maxtime 500 
+0DE1: 8@ = get_touch_slide_state from 8 to 7 mintime 0 maxtime 500 
+0DE1: 9@ = get_touch_slide_state from 9 to 8 mintime 0 maxtime 500
+if
+    6@ == 1
+then
+    WNDCTRL_GETCAR()
+    0DD3: context_set_reg 1 value 10
+    0DD2: context_call_func 12@
+end
+if
+    7@ == 1
+then
+    WNDCTRL_GETCAR()
+    0DD3: context_set_reg 1 value 11
+    0DD2: context_call_func 12@
+end
+if
+    8@ == 1
+then
+    WNDCTRL_GETCAR()
+    0DD3: context_set_reg 1 value 8
+    0DD2: context_call_func 12@
+end
+if
+    9@ == 1
+then
+    WNDCTRL_GETCAR()
+    0DD3: context_set_reg 1 value 9 
+    0DD2: context_call_func 12@
+end
+jump @WNDCTRL_1
+ 
+:WNDCTRL_GETCAR
+03C0: 0@ = actor $PLAYER_CHAR car 
+0DD3: context_set_reg 0 value 0@
+0DD2: context_call_func 10@ 
+return
+
+:CPools_GetVehicle
+hex
+ "_ZN6CPools10GetVehicleEi" 00
+end
+
+:CVehicle_SetWindowOpenFlag
+hex
+ "_ZN8CVehicle17SetWindowOpenFlagEh" 00
+end
+
+:CVehicle_ClearWindowOpenFlag
+hex
+ "_ZN8CVehicle19ClearWindowOpenFlagEh" 00
+end 

@@ -1,0 +1,92 @@
+// Script by BengbuGuards
+{$CLEO .csa}
+0000: NOP
+script_name "FLYFX"
+
+0DD0: 10@ = get_label_addr @CPools_GetVehicle
+0DD1: 10@ = get_func_addr_by_cstr_name 10@
+{0DD0: 11@ = get_label_addr @CPlane_ProcessControlInputs
+0DD1: 11@ = get_func_addr_by_cstr_name 11@
+11@ += 0x61A // STRH.W  R1, [R4,#0x880]
+0DD9: write_mem_addr 11@ value 0x8000F3AF size 4 add_ib 0 protect 1 // NOP.W
+11@ += 0x60 // STRH.W  R1, [R4,#0x880]
+0DD9: write_mem_addr 11@ value 0x8000F3AF size 4 add_ib 0 protect 1 // NOP.W} 
+
+while true
+    wait 0 
+    if or
+        00DD: actor $PLAYER_ACTOR driving_car_with_model #STUNT
+        00DD: actor $PLAYER_ACTOR driving_car_with_model #CROPDUST
+    then
+        if
+            0A52: is_widget_released 07
+        then
+            03C0: 0@ = actor $PLAYER_CHAR car
+            0DD3: context_set_reg 0 value 0@
+            0DD2: context_call_func 10@
+            0DD4: 0@ = context_get_reg 0
+            0@ += 0xA14 // bool m_bSmokeEjectorEnabled
+            0DD8: 1@ = read_mem_addr 0@ size 1 add_ib 0
+            reverse_1at() 
+            0DD9: write_mem_addr 0@ value 1@ size 1 add_ib 0 protect 0 
+        end
+    end
+    if
+        00DD: actor $PLAYER_ACTOR driving_car_with_model #POLMAV
+    then
+        if
+            0A52: is_widget_released 07
+        then
+            03C0: 0@ = actor $PLAYER_CHAR car
+            0DD3: context_set_reg 0 value 0@
+            0DD2: context_call_func 10@
+            0DD4: 0@ = context_get_reg 0
+            0@ += 0xA25 // bool m_bSearchLightEnabled
+            0DD8: 1@ = read_mem_addr 0@ size 1 add_ib 0
+            reverse_1at()
+            0DD9: write_mem_addr 0@ value 1@ size 1 add_ib 0 protect 0
+        end
+    end
+    if
+        00DD: actor $PLAYER_ACTOR driving_car_with_model #HYDRA
+    then
+        if
+            0A53: is_widget_doubletapped 04
+        then
+            03C0: 0@ = actor $PLAYER_CHAR car
+            0DD3: context_set_reg 0 value 0@
+            0DD2: context_call_func 10@
+            0DD4: 0@ = context_get_reg 0
+            0@ += 0x880 // short m_wMiscComponentAngle
+            0DD8: 1@ = read_mem_addr 0@ size 2 add_ib 0
+            if
+                1@ == 5000
+            then
+                1@ = 0
+            else
+                1@ = 5000
+            end
+            0DD9: write_mem_addr 0@ value 1@ size 2 add_ib 0 protect 0
+        end
+    end 
+end
+
+:reverse_1at
+if
+    1@ == 0
+then
+    1@ = 1
+else
+    1@ = 0
+end
+return
+
+:CPools_GetVehicle
+hex
+    "_ZN6CPools10GetVehicleEi" 00
+end
+
+:CPlane_ProcessControlInputs
+hex
+    "_ZN6CPlane20ProcessControlInputsEh" 00
+end

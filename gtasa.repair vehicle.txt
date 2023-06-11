@@ -1,0 +1,14 @@
+// This file was decompiled using SASCM.ini published on 2022-03-20
+{$CLEO .csi}
+{$NOSOURCE}
+
+script_name 'VEHDOOR' 
+if 
+  Char.IsInAnyCar($3)
+jf @VEHDOOR_28 
+Char.StoreCarIsInNoSave(0@, $3)
+Car.Fix(0@)
+Car.SetDirtLevel(0@, 0)
+
+:VEHDOOR_28
+terminate_this_custom_script 

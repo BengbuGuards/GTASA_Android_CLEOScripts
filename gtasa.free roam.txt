@@ -1,0 +1,32 @@
+// Script by BengbuGuards
+{$CLEO .csi}
+
+script_name 'FREEROAM' 
+01B4: set_player $PLAYER_CHAR can_move 1
+07CC: set_player $PLAYER_CHAR can_enter_exit_vehicles 1
+082A: set_player $PLAYER_CHAR able_to_use_crouch_button 1
+0901: enable_player $PLAYER_CHAR jump_key 1 
+0881: set_player $PLAYER_CHAR able_to_shoot_weapons 1
+0992: set_player $PLAYER_CHAR weapons_scrollable 1
+01B4: set_player $PLAYER_CHAR frozen_state 1
+0575: set_actor $PLAYER_CHAR keep_position 0 
+04D7: set_actor $PLAYER_ACTOR locked 0 
+0826: enable_hud 1 
+0581: enable_radar 1 
+0373: set_camera_directly_behind_player 
+015A: restore_camera 
+02EB: restore_camera_with_jumpcut 
+0925: restore_camera_to_user_defined 
+092F: lock_camera_target_point 0 
+0930: lock_camera_position 0 
+02A3: enable_widescreen 0 
+if 
+    00DF:   actor $PLAYER_ACTOR driving 
+then
+    03C0: 0@ = actor $PLAYER_ACTOR car 
+    0519: set_car 0@ locked 0 
+    0574: set_car 0@ keep_position 0 
+    01C3: remove_references_to_car 0@ 
+end
+
+terminate_this_custom_script 
