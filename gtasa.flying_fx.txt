@@ -5,12 +5,14 @@ script_name "FLYFX"
 
 0DD0: 10@ = get_label_addr @CPools_GetVehicle
 0DD1: 10@ = get_func_addr_by_cstr_name 10@
-{0DD0: 11@ = get_label_addr @CPlane_ProcessControlInputs
+0DD0: 11@ = get_label_addr @CPlane_ProcessControlInputs
 0DD1: 11@ = get_func_addr_by_cstr_name 11@
-11@ += 0x61A // STRH.W  R1, [R4,#0x880]
+11@ -= 1
+11@ += 0x61A // STRH.W  R1, [R4,#0x880] 
 0DD9: write_mem_addr 11@ value 0x8000F3AF size 4 add_ib 0 protect 1 // NOP.W
-11@ += 0x60 // STRH.W  R1, [R4,#0x880]
-0DD9: write_mem_addr 11@ value 0x8000F3AF size 4 add_ib 0 protect 1 // NOP.W} 
+11@ += 0x60  // STRH.W  R1, [R4,#0x880]
+0DD9: write_mem_addr 11@ value 0x8000F3AF size 4 add_ib 0 protect 1 // NOP.W 
+2@ = 0
 
 while true
     wait 0 
@@ -69,6 +71,31 @@ while true
             0DD9: write_mem_addr 0@ value 1@ size 2 add_ib 0 protect 0
         end
     end 
+    if
+        00DD: actor $PLAYER_ACTOR driving_car_with_model #CEMENT
+    then
+        if
+            0A52: is_widget_released 07 
+        then
+            if
+                2@ == 0
+            then  
+                03C0: 0@ = actor $PLAYER_CHAR car
+                066C: 2@ = attach_particle "CEMENT" to_car 0@ with_offset 0.0 -4.4 0.0 rotation 0.0 -1.0 0.0 type 1 
+                064C: make_particle 2@ visible
+            else
+                064E: stop_particle 2@
+                2@ = 0
+            end
+        end
+    else 
+        if
+            2@ <> 0
+        then
+            064E: stop_particle 2@
+            2@ = 0
+        end
+    end
 end
 
 :reverse_1at
