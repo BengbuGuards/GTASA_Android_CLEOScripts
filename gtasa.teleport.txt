@@ -1,0 +1,107 @@
+// Script by BengbuGuards
+{$CLEO .csi}
+0000: NOP
+
+0DD0: 0@ = get_label_addr @CCutsceneMgr_ms_running
+0DD1: 0@ = get_func_addr_by_cstr_name 0@ 
+0DD8: 2@ = read_mem_addr 0@ size 1 add_ib 0 // is on cutscene
+0DD0: 0@ = get_label_addr @CRadar_ms_RadarTrace
+0DD1: 0@ = get_func_addr_by_cstr_name 0@ // pRadarTrace
+0DD0: 1@ = get_label_addr @gMobileMenu
+0DD1: 1@ = get_func_addr_by_cstr_name 1@ // gMobileMenu
+000A: 1@ += 0x48 // m_TargetBlipHandle
+0DD8: 1@ = read_mem_addr 1@ size 2 add_ib 0 // m_nHandleIndex
+if or
+    1@ == 0
+    2@ == 1
+then
+    terminate_this_custom_script
+end
+
+1@ *= 0x28  // sizeof CMarker
+000A: 1@ += 0@    // pMarker = pRadarTrace[m_nHandleIndex]
+1@ += 0x8 // float x
+0DD8: 3@ = read_mem_addr 1@ size 4 add_ib 0
+1@ += 0x4 // float y
+0DD8: 4@ = read_mem_addr 1@ size 4 add_ib 0
+04E4: refresh_game_renderer_at 3@ 4@ 
+03CB: set_rendering_origin_at 3@ 4@ 100.0 
+04BB: select_interior 0 
+
+wait 0 
+//5@ = -100.0
+TIMERA = 0
+02CE: 5@ = ground_z_at 3@ 4@ 900.0 // float z
+while 5@ == 0.0
+    wait 0
+    04E4: refresh_game_renderer_at 3@ 4@ 
+    03CB: set_rendering_origin_at 3@ 4@ 100.0 
+    02CE: 5@ = ground_z_at 3@ 4@ 900.0 // float z
+    if
+        TIMERA > 300 // Is it in a infinite loop?
+    then
+        break
+    end
+end
+
+092E: get_water_height_at 3@ 4@ ignore_waves 0 store_to 6@
+if
+    0025: 6@ > 5@  // (float)
+then
+    0087: 5@ = 6@ // (float)
+end
+
+if
+    80DF: not actor $PLAYER_ACTOR driving 
+then
+    0860: link_actor $PLAYER_ACTOR to_interior 0 
+    {if
+        0A0C: player $PLAYER_CHAR on_jetpack
+    then
+        0247: load_model #JETPACK 
+        038B: load_requested_models
+        00A1: put_actor $PLAYER_CHAR at 3@ 4@ 5@ 
+        wait 0
+        while 8248: not model #JETPACK available 
+            wait 0
+        end
+        07A7: put_jetpack_on_actor $PLAYER_CHAR
+        0249: release_model #JETPACK 
+    else}
+        00A1: put_actor $PLAYER_CHAR at 3@ 4@ 5@ 
+    //end
+else
+    03C0: 6@ = actor $PLAYER_CHAR car
+    0840: link_car 6@ to_interior 0 
+    if and
+        09AE: actor $PLAYER_ACTOR driving_train
+        8981: not train 6@ wrecked
+    then
+        07C7: put_train 6@ at 3@ 4@ 5@
+    else
+        if
+            0241: player $PLAYER_CHAR in_remote_mode
+        then
+            0484: 6@ = player $PLAYER_CHAR RC_car
+            00AB: put_car 6@ at 3@ 4@ 5@ 
+        else
+            00AB: put_car 6@ at 3@ 4@ 5@ 
+        end
+    end
+end
+terminate_this_custom_script 
+
+:gMobileMenu
+hex
+    "gMobileMenu" 00
+end
+
+:CRadar_ms_RadarTrace
+hex
+    "_ZN6CRadar13ms_RadarTraceE" 00
+end
+
+:CCutsceneMgr_ms_running
+hex
+    "_ZN12CCutsceneMgr10ms_runningE" 00
+end
