@@ -9,7 +9,15 @@ end
 
 0DD0: 10@ = get_label_addr @CPools_GetVehicle
 0DD1: 10@ = get_func_addr_by_cstr_name 10@
- 
+
+0DD0: 11@ = get_label_addr @CPlane_ProcessControl
+0DD1: 11@ = get_func_addr_by_cstr_name 11@
+11@ -= 1
+11@ += 0x3A // MOVS  R0, #0x66
+0DD9: write_mem_addr 11@ value 0xBF00 size 2 add_ib 0 protect 1 // NOP
+11@ += 2 // BLX  j__ZN4CHID10IsReleasedE10HIDMapping
+0DD9: write_mem_addr 11@ value 0xE8C4F422 size 4 add_ib 0 protect 1 // BLX  j__ZN4CPad12HornJustDownEv
+
 0DD0: 11@ = get_label_addr @CPlane_ProcessControlInputs
 0DD1: 11@ = get_func_addr_by_cstr_name 11@
 11@ -= 1
@@ -28,9 +36,25 @@ end
 11@ += 0x32 // BICGT.W  R2, R2, #0x8000
 0DD9: write_mem_addr 11@ value 0x8000F3AF size 4 add_ib 0 protect 1 // NOP.W
 
+{0DD0: 11@ = get_label_addr @CVehicleModelInfo_ms_vehicleDescs
+0DD1: 11@ = get_func_addr_by_cstr_name 11@
+11@ -= 1
+11@ += 20 // DCD off_6874CC
+0DD8: 11@ = read_mem_addr 11@ size 3 add_ib 0 // DCD aBoatMovingHi
+0DD8: 11@ = read_mem_addr 11@ size 3 add_ib 1 // DCB "boat_moving_hi",0
+11@ += 0xB // "_hi",0}
+0DD9: write_mem_addr 0x6107D9 value 0 size 3 add_ib 1 protect 1 // "boat_moving"  0x6107D9 
+
+0DD0: 11@ = get_label_addr @CPad_HornJustDown
+0DD1: 11@ = get_func_addr_by_cstr_name 11@
+11@ -= 1
+11@ += 0x14 // MOVS  R0, #0 & POP  {R4,R6,R7,PC}
+0DD9: write_mem_addr 11@ value 0xBDD02000 size 4 add_ib 0 protect 1
+
 2@ = 0
 3@ = 0
 8@ = 0
+9@ = 0
 TIMERA = 0
 TIMERB = 0
 0247: load_model KMB_MARIJUANA 
@@ -51,85 +75,81 @@ while true
         0DD3: context_set_reg 0 value 0@
         0DD2: context_call_func 10@
         0DD4: 1@ = context_get_reg 0
-        1@ += 0x4B2 // [bit 4,5] BYTE m_nOverrideLights
+        1@ += 0x3A // byte m_nTypeAndStatus
+        0DD8: 1@ = read_mem_addr 1@ size 1 add_ib 0
         if
-            0A52: is_widget_released 160 
+            7 >= 1@
         then
-            0DD8: 1@ = read_mem_addr 1@ size 1 add_ib 0
+            0DD4: 1@ = context_get_reg 0
+            1@ += 0x4B2 // [bit 4,5] BYTE m_nOverrideLights
             if
-                08B7: test 1@ bit 4
-            then
-                067F: set_car 0@ lights 1 // FORCE_CAR_LIGHTS_OFF
-                00BA: show_text_styled GXT "OFF" time 1000 style 5
-            else
-                067F: set_car 0@ lights 2 // FORCE_CAR_LIGHTS_ON
-                00BA: show_text_styled GXT "ON" time 1000 style 5
-            end
-        else
-            if
-                0A54: is_widget_swiped 160
+                0A52: is_widget_released 160 
             then
                 0DD8: 1@ = read_mem_addr 1@ size 1 add_ib 0
-                if or
-                    08B7: test 1@ bit 3
+                if
                     08B7: test 1@ bit 4
                 then
-                    067F: set_car 0@ lights 0 // NO_CAR_LIGHT_OVERRIDE
-                    00BA: show_text_styled GXT "AUTO" time 1000 style 5
+                    067F: set_car 0@ lights 1 // FORCE_CAR_LIGHTS_OFF
+                    00BA: show_text_styled GXT "OFF" time 1000 style 5
                 else
-                    00BF: 1@ = current_time_hours, 39@ = current_time_minutes 
-                    if or
-                        1@ >= 22
-                        5 >= 1@
-                    then
-                        067F: set_car 0@ lights 2 // FORCE_CAR_LIGHTS_ON
-                        00BA: show_text_styled GXT "ON" time 1000 style 5
-                    else
-                        067F: set_car 0@ lights 1 // FORCE_CAR_LIGHTS_OFF
-                        00BA: show_text_styled GXT "OFF" time 1000 style 5
-                    end
+                    067F: set_car 0@ lights 2 // FORCE_CAR_LIGHTS_ON
+                    00BA: show_text_styled GXT "ON" time 1000 style 5
                 end
-            end 
+            else
+                if
+                    0A54: is_widget_swiped 160
+                then
+                    0DD8: 1@ = read_mem_addr 1@ size 1 add_ib 0
+                    if or
+                        08B7: test 1@ bit 3
+                        08B7: test 1@ bit 4
+                    then
+                        067F: set_car 0@ lights 0 // NO_CAR_LIGHT_OVERRIDE
+                        00BA: show_text_styled GXT "AUTO" time 1000 style 5
+                    else
+                        00BF: 1@ = current_time_hours, 39@ = current_time_minutes 
+                        if or
+                            1@ >= 22
+                            5 >= 1@
+                        then
+                            067F: set_car 0@ lights 2 // FORCE_CAR_LIGHTS_ON
+                            00BA: show_text_styled GXT "ON" time 1000 style 5
+                        else
+                            067F: set_car 0@ lights 1 // FORCE_CAR_LIGHTS_OFF
+                            00BA: show_text_styled GXT "OFF" time 1000 style 5
+                        end
+                    end
+                end 
+            end
         end
     end
     if or
         00DD: actor $PLAYER_ACTOR driving_car_with_model #STUNT
         00DD: actor $PLAYER_ACTOR driving_car_with_model #CROPDUST
-    then
-        if
-            0A52: is_widget_released 07
-        then
-            03C0: 0@ = actor $PLAYER_CHAR car
-            0DD3: context_set_reg 0 value 0@
-            0DD2: context_call_func 10@
-            0DD4: 0@ = context_get_reg 0
-            0@ += 0xA14 // bool m_bSmokeEjectorEnabled
-            0DD8: 1@ = read_mem_addr 0@ size 1 add_ib 0
-            reverse_1at() 
-            0DD9: write_mem_addr 0@ value 1@ size 1 add_ib 0 protect 0 
-        end
-        continue 
-    end
-    if
         00DD: actor $PLAYER_ACTOR driving_car_with_model #POLMAV
     then
         if
-            0A52: is_widget_released 07
+            9@ == 0
         then
-            03C0: 0@ = actor $PLAYER_CHAR car
-            0DD3: context_set_reg 0 value 0@
-            0DD2: context_call_func 10@
-            0DD4: 0@ = context_get_reg 0
-            0@ += 0xA25 // bool m_bSearchLightEnabled
-            0DD8: 1@ = read_mem_addr 0@ size 1 add_ib 0
-            reverse_1at()
-            0DD9: write_mem_addr 0@ value 1@ size 1 add_ib 0 protect 0
+            0DD9: write_mem_addr 11@ value 0xBF00E02D size 4 add_ib 0 protect 1 // B  loc_3FA6C2 & NOP
+            9@ = 1
         end
         continue
+    else
+        if
+            9@ == 1
+        then
+            0DD9: write_mem_addr 11@ value 0xBDD02000 size 4 add_ib 0 protect 1 // MOVS  R0, #0 & POP  {R4,R6,R7,PC}
+            9@ = 0
+        end
     end
     if
         00DD: actor $PLAYER_ACTOR driving_car_with_model #HYDRA
     then
+        IS_PLAYER_REALLY_IN_CAR()
+        if
+            0@ == 1
+        jf continue
         if
             0A53: is_widget_doubletapped 04
         then
@@ -153,6 +173,10 @@ while true
     if
         00DD: actor $PLAYER_ACTOR driving_car_with_model #FIRELA
     then
+        IS_PLAYER_REALLY_IN_CAR()
+        if
+            0@ == 1
+        jf continue
         03C0: 0@ = actor $PLAYER_CHAR car
         0DD3: context_set_reg 0 value 0@
         0DD2: context_call_func 10@
@@ -209,6 +233,10 @@ while true
     if
         00DD: actor $PLAYER_ACTOR driving_car_with_model #CEMENT
     then
+        IS_PLAYER_REALLY_IN_CAR()
+        if
+            0@ == 1
+        jf continue
         if
             0A52: is_widget_released 25 
         then
@@ -280,19 +308,31 @@ while true
     end
 end
 
-:reverse_1at
+
+:IS_PLAYER_REALLY_IN_CAR // out: 0@
+03C0: 0@ = actor $PLAYER_CHAR car
+0DD3: context_set_reg 0 value 0@
+0DD2: context_call_func 10@
+0DD4: 0@ = context_get_reg 0
+0@ += 0x3A // byte m_nTypeAndStatus
+0DD8: 0@ = read_mem_addr 0@ size 1 add_ib 0
 if
-    1@ == 0
+    7 >= 0@
 then
-    1@ = 1
+    0@ = 1
 else
-    1@ = 0
+    0@ = 0
 end
 return
 
 :CPools_GetVehicle
 hex
     "_ZN6CPools10GetVehicleEi" 00
+end
+
+:CPlane_ProcessControl
+hex
+    "_ZN6CPlane14ProcessControlEv" 00
 end
 
 :CPlane_ProcessControlInputs
@@ -303,4 +343,14 @@ end
 :CVehicle_ProcessSirenAndHorn
 hex
     "_ZN8CVehicle19ProcessSirenAndHornEb" 00
+end
+
+{:CVehicleModelInfo_ms_vehicleDescs
+hex
+    "_ZN17CVehicleModelInfo15ms_vehicleDescsE" 00
+end}
+
+:CPad_HornJustDown
+hex
+    "_ZN4CPad12HornJustDownEv" 00
 end

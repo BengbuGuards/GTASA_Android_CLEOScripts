@@ -1,6 +1,7 @@
 // Script by BengbuGuards
 {$CLEO .csi}
 0000: NOP
+script_name "TP"
 
 0DD0: 0@ = get_label_addr @CCutsceneMgr_ms_running
 0DD1: 0@ = get_func_addr_by_cstr_name 0@ 
@@ -31,12 +32,12 @@ end
 wait 0 
 //5@ = -100.0
 TIMERA = 0
-02CE: 5@ = ground_z_at 3@ 4@ 900.0 // float z
+02CE: 5@ = ground_z_at 3@ 4@ 950.0 // float z
 while 5@ == 0.0
     wait 0
     04E4: refresh_game_renderer_at 3@ 4@ 
     03CB: set_rendering_origin_at 3@ 4@ 100.0 
-    02CE: 5@ = ground_z_at 3@ 4@ 900.0 // float z
+    02CE: 5@ = ground_z_at 3@ 4@ 950.0 // float z
     if
         TIMERA > 300 // Is it in a infinite loop?
     then
@@ -49,6 +50,7 @@ if
     0025: 6@ > 5@  // (float)
 then
     0087: 5@ = 6@ // (float)
+    5@ += 5.0
 end
 
 if
@@ -83,10 +85,8 @@ else
             0241: player $PLAYER_CHAR in_remote_mode
         then
             0484: 6@ = player $PLAYER_CHAR RC_car
-            00AB: put_car 6@ at 3@ 4@ 5@ 
-        else
-            00AB: put_car 6@ at 3@ 4@ 5@ 
         end
+        00AB: put_car 6@ at 3@ 4@ 5@ 
     end
 end
 terminate_this_custom_script 

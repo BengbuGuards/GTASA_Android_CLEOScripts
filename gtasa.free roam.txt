@@ -1,7 +1,6 @@
 // Script by BengbuGuards
 {$CLEO .csi}
 
-script_name 'FREEROAM' 
 01B4: set_player $PLAYER_CHAR can_move 1
 07CC: set_player $PLAYER_CHAR can_enter_exit_vehicles 1
 082A: set_player $PLAYER_CHAR able_to_use_crouch_button 1
@@ -22,7 +21,7 @@ script_name 'FREEROAM'
 0930: lock_camera_position 0 
 02A3: enable_widescreen 0 
 if 
-    00DF:   actor $PLAYER_ACTOR driving 
+    00DF: actor $PLAYER_ACTOR driving 
 then
     03C0: 0@ = actor $PLAYER_ACTOR car 
     0519: set_car 0@ locked 0 
